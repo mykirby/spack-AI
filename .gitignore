@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+
+# Secrets
+.env
+
+# Runtime data (sessions, datasets, training runs, indexes) and generated outputs
+data/*
+!data/.gitkeep
+output/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

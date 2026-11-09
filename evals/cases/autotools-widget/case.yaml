@@ -1,0 +1,7 @@
+package: libwidget
+source: ../../../tests/fixtures/autotools_project
+expected:
+  build_system: autotools
+  base_class: AutotoolsPackage
+  dependencies: [zlib-api, glib, mpi, pkgconfig, autoconf, automake, libtool, m4]
+  variants: [shared_memory, zlib]

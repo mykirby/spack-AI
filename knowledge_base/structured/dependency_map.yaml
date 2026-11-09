@@ -1,0 +1,246 @@
+# Upstream dependency name -> Spack package.
+#
+# Loaded directly by the map_dependencies skill (not indexed for text search).
+# Extend freely: this table is the first thing the mapper consults, before any
+# trained model or guess.
+#
+# An entry is either a Spack package name, or a mapping with:
+#   spack:      package or virtual name; null means "no Spack dependency needed"
+#   virtual:    true for virtual packages (mpi, blas, lapack, zlib-api, ...)
+#   type:       dependency types if not the default [build, link]
+#   components: upstream component -> variant string appended to the spec
+#   component_template: applied to components not listed, "{component}" is lower-cased
+#   note:       guidance surfaced to the agent and as a recipe comment
+#
+# Names and virtuals reflect Spack 1.x conventions; verify against `spack list` /
+# `spack providers` on the target installation.
+
+cmake:                      # find_package(), Autoconf lookup macros, program names
+  MPI: {spack: mpi, virtual: true}
+  OpenMP: {spack: null, note: "OpenMP comes from the compiler; no depends_on needed. With apple-clang add depends_on('llvm-openmp', when='%apple-clang')."}
+  Threads: {spack: null}
+  CUDA: {spack: cuda, note: "Prefer inheriting from CudaPackage (adds +cuda and cuda_arch variants)."}
+  CUDAToolkit: {spack: cuda, note: "Prefer inheriting from CudaPackage (adds +cuda and cuda_arch variants)."}
+  HIP: {spack: hip, note: "Prefer inheriting from ROCmPackage (adds +rocm and amdgpu_target)."}
+  OpenACC: {spack: null, note: "OpenACC is a compiler feature (nvhpc, gcc with offload)."}
+  BLAS: {spack: blas, virtual: true}
+  LAPACK: {spack: lapack, virtual: true}
+  ScaLAPACK: {spack: scalapack, virtual: true}
+  HDF5:
+    spack: hdf5
+    components: {HL: "+hl", Fortran: "+fortran", Fortran_HL: "+fortran+hl", CXX: "+cxx", C: ""}
+    note: "If the project uses parallel HDF5 (H5Pset_fapl_mpio), require hdf5+mpi."
+  NetCDF: netcdf-c
+  netCDF: netcdf-c
+  NetCDF-Fortran: netcdf-fortran
+  PnetCDF: parallel-netcdf
+  ADIOS2: adios2
+  Boost: {spack: boost, component_template: "+{component}"}
+  Eigen3: eigen
+  FFTW3: {spack: fftw-api, virtual: true}
+  FFTW: {spack: fftw-api, virtual: true}
+  GSL: gsl
+  ZLIB: {spack: zlib-api, virtual: true}
+  BZip2: bzip2
+  LibLZMA: xz
+  zstd: zstd
+  PNG: libpng
+  JPEG: {spack: jpeg, virtual: true}
+  TIFF: libtiff
+  CURL: curl
+  OpenSSL: openssl
+  LibXml2: libxml2
+  EXPAT: expat
+  SQLite3: sqlite
+  LibArchive: libarchive
+  Iconv: {spack: iconv, virtual: true}
+  Intl: gettext
+  Readline: readline
+  Curses: ncurses
+  LibFFI: libffi
+  Python: {spack: python, type: [build, link, run]}
+  Python3: {spack: python, type: [build, link, run]}
+  PythonInterp: {spack: python, type: [build]}
+  PythonLibs: python
+  pybind11: {spack: py-pybind11, type: [build]}
+  nanobind: {spack: py-nanobind, type: [build]}
+  Kokkos: kokkos
+  KokkosKernels: kokkos-kernels
+  RAJA: raja
+  Umpire: umpire
+  PETSc: petsc
+  SLEPc: slepc
+  Trilinos: trilinos
+  hypre: hypre
+  SuperLU: superlu
+  SuperLU_DIST: superlu-dist
+  MUMPS: mumps
+  METIS: metis
+  ParMETIS: parmetis
+  Scotch: scotch
+  SUNDIALS: sundials
+  TBB: {spack: tbb, virtual: true}
+  OpenCL: {spack: opencl, virtual: true}
+  OpenGL: {spack: gl, virtual: true}
+  GLUT: {spack: glut, virtual: true}
+  X11: libx11
+  VTK: vtk
+  Qt5: qt
+  Qt6: qt-base
+  yaml-cpp: yaml-cpp
+  fmt: fmt
+  spdlog: spdlog
+  nlohmann_json: nlohmann-json
+  CLI11: cli11
+  GTest: {spack: googletest, type: [test], note: "Only needed when tests are built; consider type='test' or a variant."}
+  googletest: {spack: googletest, type: [test]}
+  Catch2: {spack: catch2, type: [test]}
+  benchmark: {spack: benchmark, type: [test]}
+  Doxygen: {spack: doxygen, type: [build], note: "Documentation only; usually behind a +doc variant."}
+  Sphinx: {spack: py-sphinx, type: [build]}
+  PkgConfig: {spack: pkgconfig, virtual: true, type: [build]}
+  Git: {spack: git, type: [build]}
+  SWIG: {spack: swig, type: [build]}
+  BISON: {spack: bison, type: [build]}
+  FLEX: {spack: flex, type: [build]}
+  Perl: {spack: perl, type: [build]}
+  Protobuf: protobuf
+  gRPC: grpc
+  ZeroMQ: libzmq
+  UUID: {spack: uuid, virtual: true}
+  LibUUID: {spack: uuid, virtual: true}
+  Libevent: libevent
+  hwloc: hwloc
+  PAPI: papi
+  Caliper: caliper
+  LLVM: llvm
+  Clang: llvm
+
+pkgconfig:                  # pkg-config module names (also Meson dependency() names)
+  zlib: {spack: zlib-api, virtual: true}
+  libpng: libpng
+  libpng16: libpng
+  hdf5: hdf5
+  netcdf: netcdf-c
+  netcdf-fortran: netcdf-fortran
+  fftw3: {spack: fftw-api, virtual: true}
+  fftw3f: {spack: fftw-api, virtual: true}
+  gsl: gsl
+  libxml-2.0: libxml2
+  openssl: openssl
+  libssl: openssl
+  libcrypto: openssl
+  libcurl: curl
+  glib-2.0: glib
+  gio-2.0: glib
+  gobject-2.0: glib
+  gtk+-3.0: gtk+
+  gtk4: gtk4
+  cairo: cairo
+  pango: pango
+  pixman-1: pixman
+  freetype2: freetype
+  fontconfig: fontconfig
+  mpi: {spack: mpi, virtual: true}
+  ompi: {spack: mpi, virtual: true}
+  mpich: {spack: mpi, virtual: true}
+  blas: {spack: blas, virtual: true}
+  openblas: {spack: blas, virtual: true}
+  lapack: {spack: lapack, virtual: true}
+  sqlite3: sqlite
+  libffi: libffi
+  yaml-0.1: libyaml
+  json-c: json-c
+  eigen3: eigen
+  uuid: {spack: uuid, virtual: true}
+  libzstd: zstd
+  liblzma: xz
+  bzip2: bzip2
+  hwloc: hwloc
+  libevent: libevent
+  x11: libx11
+  boost: boost
+  cuda: cuda
+  libtiff-4: libtiff
+  libjpeg: {spack: jpeg, virtual: true}
+
+libraries:                  # -l<name>, AC_CHECK_LIB, find_library
+  m: {spack: null, note: "libm is part of the C library."}
+  c: {spack: null}
+  dl: {spack: null}
+  rt: {spack: null}
+  pthread: {spack: null}
+  stdc++: {spack: null}
+  gfortran: {spack: null, note: "Fortran runtime comes from the compiler."}
+  gomp: {spack: null, note: "OpenMP runtime comes from the compiler."}
+  z: {spack: zlib-api, virtual: true}
+  bz2: bzip2
+  lzma: xz
+  zstd: zstd
+  hdf5: hdf5
+  hdf5_hl: {spack: hdf5, components: {_: "+hl"}}
+  hdf5_fortran: {spack: hdf5, components: {_: "+fortran"}}
+  netcdf: netcdf-c
+  netcdff: netcdf-fortran
+  pnetcdf: parallel-netcdf
+  fftw3: {spack: fftw-api, virtual: true}
+  fftw3f: {spack: fftw-api, virtual: true}
+  fftw3_mpi: {spack: fftw-api, virtual: true, note: "MPI FFTW: require fftw+mpi."}
+  fftw3_omp: {spack: fftw-api, virtual: true, note: "Threaded FFTW: require fftw+openmp."}
+  blas: {spack: blas, virtual: true}
+  openblas: {spack: blas, virtual: true}
+  lapack: {spack: lapack, virtual: true}
+  scalapack: {spack: scalapack, virtual: true}
+  mkl_rt: {spack: blas, virtual: true, note: "Links MKL directly; using the blas/lapack virtuals is more portable."}
+  gsl: gsl
+  gslcblas: {spack: null, note: "Part of gsl."}
+  png: libpng
+  jpeg: {spack: jpeg, virtual: true}
+  tiff: libtiff
+  curl: curl
+  ssl: openssl
+  crypto: openssl
+  xml2: libxml2
+  expat: expat
+  mpi: {spack: mpi, virtual: true}
+  mpi_cxx: {spack: mpi, virtual: true}
+  mpifort: {spack: mpi, virtual: true}
+  ncurses: ncurses
+  tinfo: ncurses
+  readline: readline
+  sqlite3: sqlite
+  ffi: libffi
+  uuid: {spack: uuid, virtual: true}
+  metis: metis
+  parmetis: parmetis
+  cudart: cuda
+  cublas: cuda
+  cufft: cuda
+  hwloc: hwloc
+  numa: numactl
+  papi: papi
+  yaml: libyaml
+  yaml-cpp: yaml-cpp
+  archive: libarchive
+  X11: libx11
+  GL: {spack: gl, virtual: true}
+
+library_prefixes:           # library name prefix -> package (boost_filesystem, ...)
+  boost_: {spack: boost, component_from_suffix: true}
+  petsc: petsc
+  trilinos_: trilinos
+  vtk: vtk
+  mkl_: {spack: blas, virtual: true}
+
+python:                     # PyPI distribution -> Spack package, when not simply "py-<name>"
+  python: {spack: python, type: [build, run]}
+  opencv-python: opencv
+  opencv-python-headless: opencv
+  torch: py-torch
+  tensorflow: py-tensorflow
+  scikit-learn: py-scikit-learn
+  pyyaml: py-pyyaml
+  pillow: py-pillow
+  mpi4py: py-mpi4py
+  h5py: py-h5py
+  cupy-cuda12x: py-cupy

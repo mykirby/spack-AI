@@ -1,0 +1,140 @@
+# Build-failure signatures used by the diagnose_build_failure skill.
+#
+# pattern:      Python regex matched line by line (case-insensitive). Groups are
+#               available to explanation/suggestions as {1}, {2}, ...
+# category:     coarse class, used for statistics and ML labels
+# search:       optional knowledge-base query for deeper guidance
+#
+# Add every new failure you resolve here; it is cheap and compounds.
+
+- id: cmake-package-not-found
+  pattern: 'Could NOT find (\w+)'
+  category: missing_dependency
+  explanation: "CMake's find_package({1}) failed."
+  suggestions:
+    - "Add depends_on() for the Spack package that provides {1} (map_dependencies)."
+    - "If {1} is optional upstream, add a variant and pass -DCMAKE_DISABLE_FIND_PACKAGE_{1}=ON when it is off."
+  search: "find_package missing dependency"
+
+- id: cmake-config-not-found
+  pattern: 'By not providing "Find(\w+)\.cmake"'
+  category: missing_dependency
+  explanation: "No Find{1}.cmake module and no {1}Config.cmake on CMAKE_PREFIX_PATH."
+  suggestions:
+    - "Add depends_on() for the package providing {1}; Spack puts dependency prefixes on CMAKE_PREFIX_PATH."
+    - "If the dependency is present, check that it was built with CMake config files (some need a variant)."
+
+- id: missing-header
+  pattern: 'fatal error: ([\w/.+-]+\.(?:h|hh|hpp|hxx|mod)):? No such file'
+  category: missing_dependency
+  explanation: "Header or Fortran module {1} was not found on the include path."
+  suggestions:
+    - "Identify the library that ships {1} and add depends_on() for it."
+    - "If the dependency is declared, check it is a link/build dependency (not run-only)."
+
+- id: undefined-reference
+  pattern: "undefined reference to [`']([^'`]+)'"
+  category: link_error
+  explanation: "The linker could not resolve symbol {1}."
+  suggestions:
+    - "A library is missing from the link line or listed in the wrong order."
+    - "With Fortran/C interop, check name mangling (trailing underscores) and the BLAS/LAPACK provider."
+    - "For C++ symbols, check the C++ standard and ABI (_GLIBCXX_USE_CXX11_ABI) across dependencies."
+
+- id: library-not-found
+  pattern: '(?:ld(?:\.\w+)?: )?cannot find -l(\S+)'
+  category: link_error
+  explanation: "The linker could not find lib{1}."
+  suggestions:
+    - "Add depends_on() for the package providing lib{1} (map_dependencies with source=library)."
+    - "If the Makefile hard-codes -L paths, rewrite them in edit() using spec['<dep>'].libs."
+
+- id: no-rule-to-make-target
+  pattern: "No rule to make target [`']([^'`]+)'"
+  category: build_system
+  explanation: "make has no rule for {1}."
+  suggestions:
+    - "Check build_targets/install_targets in the recipe against the Makefile's targets."
+    - "Generated files may require a code-generation step or tool (bison, flex, python) as a build dependency."
+
+- id: unrecognized-compiler-flag
+  pattern: "(?:unrecognized command[- ]line option|unknown argument|unknown option):? [`'\"]?([^'`\"\\s]+)"
+  category: compiler
+  explanation: "The compiler rejected flag {1}."
+  suggestions:
+    - "The upstream build assumes a specific compiler family; filter the flag in edit() or patch it."
+    - "Add conflicts('%<compiler>') if the code cannot build with this compiler."
+
+- id: fortran-argument-mismatch
+  pattern: 'Type mismatch (?:in|between) argument'
+  category: compiler
+  explanation: "GCC 10+ rejects legacy Fortran argument mismatches by default."
+  suggestions:
+    - "Add -fallow-argument-mismatch for %gcc@10: via flag_handler or FFLAGS."
+
+- id: nvcc-unsupported-host-compiler
+  pattern: 'unsupported (?:GNU|clang) version'
+  category: compiler
+  explanation: "This CUDA version does not support the host compiler version."
+  suggestions:
+    - "Pick a host compiler supported by the CUDA release, or add a conflicts() on that combination."
+
+- id: concretization-failed
+  pattern: '(?:concretization failed|Cannot satisfy|unsatisfiable|Spack concretizer internal error)'
+  category: concretization
+  explanation: "The concretizer could not find a consistent set of package versions and variants."
+  suggestions:
+    - "Read the conflicting constraints in the message; loosen version ranges or variant requirements."
+    - "Check packages: requirements and externals in spack.yaml for contradictions."
+  search: "concretizer unsatisfiable"
+
+- id: checksum-mismatch
+  pattern: 'sha256 checksum failed|checksum does not match'
+  category: fetch
+  explanation: "The downloaded archive does not match the sha256 in the recipe."
+  suggestions:
+    - "Regenerate the checksum with `spack checksum <pkg> <version>`; never disable verification."
+
+- id: fetch-failed
+  pattern: 'All fetchers failed|FetchError|Failed to fetch'
+  category: fetch
+  explanation: "Spack could not download a source archive."
+  suggestions:
+    - "Compute nodes are often offline: run `spack fetch` or `spack mirror create` on a login node."
+    - "Check url/list_url in the recipe and any proxy settings."
+
+- id: disk-quota
+  pattern: 'Disk quota exceeded|No space left on device'
+  category: environment
+  explanation: "The build ran out of disk space or quota."
+  suggestions:
+    - "Point config:build_stage at scratch space and clean old stages (`spack clean -a`)."
+
+- id: out-of-memory
+  pattern: 'Killed signal terminated program|virtual memory exhausted|internal compiler error: Killed|Cannot allocate memory'
+  category: environment
+  explanation: "The compiler was killed, most likely out of memory."
+  suggestions:
+    - "Reduce build parallelism (spack install -j N) or build on a compute node with more memory."
+
+- id: python-module-missing
+  pattern: "ModuleNotFoundError: No module named '([\\w.]+)'"
+  category: missing_dependency
+  explanation: "Python module {1} is not available in the build or run environment."
+  suggestions:
+    - "Add depends_on('py-<name>', type=('build', 'run')) (check with map_dependencies source=python_requirement)."
+
+- id: autotools-missing
+  pattern: '(?:autoreconf|aclocal|automake|libtoolize): (?:command )?not found|possibly undefined macro: (\w+)'
+  category: build_system
+  explanation: "The build needs Autotools that are not available, or an m4 macro is missing."
+  suggestions:
+    - "Add depends_on('autoconf'/'automake'/'libtool'/'m4', type='build')."
+    - "For a missing AX_* macro add depends_on('autoconf-archive', type='build')."
+
+- id: permission-denied-install
+  pattern: 'Permission denied.*(/usr/local|/usr/bin|/usr/lib|/opt)'
+  category: build_system
+  explanation: "The build tries to install outside Spack's prefix."
+  suggestions:
+    - "The Makefile hard-codes an install path: rewrite PREFIX/DESTDIR in edit() or pass PREFIX={prefix} to make install."

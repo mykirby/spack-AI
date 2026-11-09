@@ -1,0 +1,7 @@
+package: heat-solver
+source: ../../../tests/fixtures/cmake_project
+expected:
+  build_system: cmake
+  base_class: CMakePackage
+  dependencies: [blas, lapack, boost, mpi, hdf5, pkgconfig, fftw-api, zlib-api, cmake]
+  variants: [mpi, hdf5, shared]

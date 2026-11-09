@@ -1,0 +1,7 @@
+package: tinyviz
+source: ../../../tests/fixtures/meson_project
+expected:
+  build_system: meson
+  base_class: MesonPackage
+  dependencies: [zlib-api, libpng, cairo, meson]
+  variants: [cairo, docs]

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Spack_Toolkit"
+version = "1.4.0"
+description = "Helpers for HPC data pipelines"
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.22,<2", "PyYAML", "h5py"]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.5"]
+
+[project.urls]
+Homepage = "https://example.org/toolkit"

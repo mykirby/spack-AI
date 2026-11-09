@@ -1,0 +1,15 @@
+# Train the frequency-table baseline on dependency mappings harvested from sessions.
+#   spack-ai ml collect
+#   spack-ai ml train config/training/dependency_baseline.yaml
+model: dependency_lookup
+dataset: data/datasets/sessions.jsonl
+hyperparams:
+  min_count: 1
+outcomes: [success]
+# Only learn mappings that survived into the final recipe.
+require_metadata:
+  in_final_recipe: true
+val_fraction: 0.1
+test_fraction: 0.1
+seed: 13
+output_dir: data/runs

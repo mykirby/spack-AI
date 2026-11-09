@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spack-ai"
+version = "0.1.0"
+description = "An AI agent that turns source trees and build files into Spack recipes, environments, and HPC build scripts."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "anthropic>=2.4",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+# The ML training stack is not chosen yet. Add its packages here (e.g. torch,
+# transformers, scikit-learn) once it is, and register a model in spack_ai.ml.models.
+ml = []
+
+[project.scripts]
+spack-ai = "spack_ai.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/spack_ai"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

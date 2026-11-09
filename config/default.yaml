@@ -1,0 +1,56 @@
+# spack-ai default configuration.
+# Copy this file for a specific HPC site and point SPACK_AI_CONFIG at it.
+# Relative paths are resolved against the repository root.
+
+llm:
+  provider: anthropic
+  model: claude-opus-5-5
+  max_tokens: 64000
+  # low | medium | high | xhigh | max. Higher effort reasons more and costs more.
+  effort: high
+  # Server-side refusal fallback ("default" lets the API pick by refusal category).
+  # Set to null to disable.
+  fallbacks: default
+
+agent:
+  # Upper bound on model turns per user message.
+  max_turns: 40
+  # When false, skills that change state (spack install, network fetches, ...) ask first.
+  auto_approve: false
+
+paths:
+  knowledge_base: knowledge_base
+  data_dir: data
+  output_dir: output
+
+spack:
+  # Path to the spack executable. null = look in $SPACK_ROOT/bin, then $PATH.
+  executable: null
+  # Spack release the generated recipes target. "1.0" and later use the
+  # spack_repo.builtin import style and the v2 repository layout.
+  target_version: "1.0"
+  command_timeout: 900
+
+knowledge:
+  chunk_size: 1500
+  chunk_overlap: 200
+  top_k: 6
+
+recipe:
+  # Repository namespace for generated recipes.
+  namespace: spack_ai_local
+  maintainers: []
+
+site:
+  # Defaults for generated job scripts. Override per machine.
+  name: null
+  scheduler: slurm        # slurm | pbs | lsf | none
+  partition: null
+  account: null
+  modules: []
+  build_jobs: 16
+
+ml:
+  # Path to a training run directory (data/runs/<run>) whose model the
+  # dependency mapper consults for names the curated map does not know.
+  dependency_model: null
